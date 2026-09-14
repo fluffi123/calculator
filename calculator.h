@@ -8,11 +8,13 @@ class calculator {
 public:
     std::string Spaces(std::string input);
     std::vector<std::string> separate(std::string input);
+    bool isNumber(const std::string& s);
+    bool isvalid(std::string tokens);
+    int priority(std::string op);
     double factorial(std::string a);
     double exponinantion(std::string a, std::string b);
-    bool isvalid(std::string tokens);
-    double calcus(std::vector<std::string> tokens);
-    std::vector<std::string> skobki(std::vector<std::string> tokens);
+    std::vector<std::string> toRPN(std::vector<std::string> tokens);
+    double evalRPN(std::vector<std::string> rpn);
 };
 
 #endif

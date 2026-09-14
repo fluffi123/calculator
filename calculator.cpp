@@ -1,7 +1,6 @@
 #include "calculator.h"
 #include <sstream>
 #include <cctype>
-
 std::string calculator::Spaces(std::string input) {
     std::string newinput;
     int i = 0;
@@ -31,6 +30,50 @@ std::vector<std::string> calculator::separate(std::string input) {
     return tokens;
 }
 
+bool calculator::isNumber(const std::string& s) {
+    if (s.empty()) return false;
+    int i = 0;
+    bool hasDigit = false;
+    while (i < s.size()) {
+        char c = s[i];
+        if (isdigit(c)) {
+            hasDigit = true;
+        }
+        else if (c == '.' && i != 0) {
+        }
+        else if (c == '-' && i == 0) {
+        }
+        else {
+            return false;
+        }
+        i++;
+    }
+    return hasDigit;
+}
+
+bool calculator::isvalid(std::string tokens) {
+    int i = 0;
+    bool valid = true;
+    while (i < tokens.size()) {
+        if (isdigit(tokens[i]) || tokens[i] == '+' || tokens[i] == '-' || tokens[i] == '*' || tokens[i] == '/' || tokens[i] == '(' || tokens[i] == ')' || tokens[i] == '^' || tokens[i] == '.' || tokens[i] == '!' || tokens[i] == ' ') {
+            i++;
+        }
+        else {
+            valid = false;
+            break;
+        }
+    }
+    return valid;
+}
+
+int calculator::priority(std::string op) {
+    if (op == "+" || op == "-") return 1;
+    if (op == "*" || op == "/") return 2;
+    if (op == "^") return 3;
+    if (op == "!") return 4;
+    return 0;
+}
+
 double calculator::factorial(std::string a) {
     double answer = 1;
     int i = 1;
@@ -51,119 +94,81 @@ double calculator::exponinantion(std::string a, std::string b) {
     return answer;
 }
 
-bool calculator::isvalid(std::string tokens) {
-    int i = 0;
-    bool valid = true;
-    while (i < tokens.size()) {
-        if (isdigit(tokens[i]) || tokens[i] == '+' || tokens[i] == '-' || tokens[i] == '*' || tokens[i] == '/' || tokens[i] == '(' || tokens[i] == ')' || tokens[i] == '^' || tokens[i] == '.' || tokens[i] == '!') {
-            i++;
-        }
-        else {
-            valid = false;
-            break;
-        }
-    }
-    return valid;
-}
+std::vector<std::string> calculator::toRPN(std::vector<std::string> tokens) {
+    std::vector<std::string> output;
+    std::vector<std::string> opStack;
 
-double calculator::calcus(std::vector<std::string> tokens) {
     int i = 0;
     while (i < tokens.size()) {
-        if (tokens[i] == "^") {
-            double result = exponinantion(tokens[i - 1], tokens[i + 1]);
-            tokens[i] = std::to_string(result);
-            tokens.erase(tokens.begin() + i + 1);
-            tokens.erase(tokens.begin() + i - 1);
+        std::string token = tokens[i];
+
+        if (isNumber(token)) {
+            output.push_back(token);
         }
-        else if (tokens[i] == "!") {
-            double result = factorial(tokens[i - 1]);
-            tokens[i] = std::to_string(result);
-            tokens.erase(tokens.begin() + i - 1);
+        else if (token == "(") {
+            opStack.push_back(token);
         }
-        else {
-            i++;
+        else if (token == ")") {
+            while (!opStack.empty() && opStack.back() != "(") {
+                output.push_back(opStack.back());
+                opStack.pop_back();
+            }
+            if (!opStack.empty()) {
+                opStack.pop_back();
+            }
         }
-    }
-    i = 0;
-    while (i < tokens.size()) {
-        if (tokens[i] == "*") {
-            double result = std::stod(tokens[i - 1]) * std::stod(tokens[i + 1]);
-            tokens[i] = std::to_string(result);
-            tokens.erase(tokens.begin() + i + 1);
-            tokens.erase(tokens.begin() + i - 1);
-        }
-        else if (tokens[i] == "/") {
-            double result = std::stod(tokens[i - 1]) / std::stod(tokens[i + 1]);
-            tokens[i] = std::to_string(result);
-            tokens.erase(tokens.begin() + i + 1);
-            tokens.erase(tokens.begin() + i - 1);
+        else if (token == "!") {
+            output.push_back(token);
         }
         else {
-            i++;
+            while (!opStack.empty() && opStack.back() != "(" &&
+                   (priority(opStack.back()) > priority(token) ||
+                   (priority(opStack.back()) == priority(token) && token != "^"))) {
+                output.push_back(opStack.back());
+                opStack.pop_back();
+            }
+            opStack.push_back(token);
         }
+        i++;
     }
-    i = 0;
-    while (i < tokens.size()) {
-        if (tokens[i] == "+") {
-            double result = std::stod(tokens[i - 1]) + std::stod(tokens[i + 1]);
-            tokens[i] = std::to_string(result);
-            tokens.erase(tokens.begin() + i + 1);
-            tokens.erase(tokens.begin() + i - 1);
-        }
-        else if (tokens[i] == "-") {
-            double result = std::stod(tokens[i - 1]) - std::stod(tokens[i + 1]);
-            tokens[i] = std::to_string(result);
-            tokens.erase(tokens.begin() + i + 1);
-            tokens.erase(tokens.begin() + i - 1);
-        }
-        else {
-            i++;
-        }
+
+    while (!opStack.empty()) {
+        output.push_back(opStack.back());
+        opStack.pop_back();
     }
-    double answer = std::stod(tokens[0]);
-    return answer;
+
+    return output;
 }
 
-std::vector<std::string> calculator::skobki(std::vector<std::string> tokens) {
-    while (true) {
-        int openIdx = -1;
-        int i = 0;
-        while (i < tokens.size()) {
-            if (tokens[i] == "(") {
-                openIdx = i;
-            }
-            i++;
+double calculator::evalRPN(std::vector<std::string> rpn) {
+    std::vector<double> stack;
+
+    int i = 0;
+    while (i < rpn.size()) {
+        std::string token = rpn[i];
+
+        if (isNumber(token)) {
+            stack.push_back(std::stod(token));
         }
-        if (openIdx == -1) break;
-        int closeIdx = -1;
-        i = openIdx + 1;
-        while (i < tokens.size()) {
-            if (tokens[i] == ")") {
-                closeIdx = i;
-                break;
-            }
-            i++;
+        else if (token == "!") {
+            double a = stack.back(); stack.pop_back();
+            double result = factorial(std::to_string((int)a));
+            stack.push_back(result);
         }
-        std::vector<std::string> inner;
-        i = openIdx + 1;
-        while (i < closeIdx) {
-            inner.push_back(tokens[i]);
-            i++;
+        else {
+            double b = stack.back(); stack.pop_back();
+            double a = stack.back(); stack.pop_back();
+            double result = 0;
+            if (token == "+") result = a + b;
+            else if (token == "-") result = a - b;
+            else if (token == "*") result = a * b;
+            else if (token == "/") result = a / b;
+            else if (token == "^") result = exponinantion(std::to_string(a), std::to_string(b));
+            stack.push_back(result);
         }
-        double result = calcus(inner);
-        std::vector<std::string> newTokens;
-        i = 0;
-        while (i < openIdx) {
-            newTokens.push_back(tokens[i]);
-            i++;
-        }
-        newTokens.push_back(std::to_string((int)result));
-        i = closeIdx + 1;
-        while (i < tokens.size()) {
-            newTokens.push_back(tokens[i]);
-            i++;
-        }
-        tokens = newTokens;
+        i++;
     }
-    return tokens;
+
+    if (stack.empty()) return 0;
+    return stack.back();
 }
