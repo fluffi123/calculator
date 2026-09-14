@@ -57,17 +57,17 @@ public:
         return answer;
     }
 
-    void page(std::string input) {
-        std::cin >> input;
-        while (input != "exit") {
-            if (input == "help") {
-                std::cout << "here is possible actions \n 1.Print 'exit' to end code \n 2. Print 'help' for list of actions \n 3. Print 'matrix' for solving equations with them";
-            }
-            else if (input == "matrix") {
-                break;
-            }
-        }
-    }
+    //void page(std::string input) {
+    //    std::cin >> input;
+    //    while (input != "exit") {
+    //        if (input == "help") {
+    //            std::cout << "here is possible actions \n 1.Print 'exit' to end code \n 2. Print 'help' for list of actions \n 3. Print 'matrix' for solving equations with them";
+    //        }
+    //        else if (input == "matrix") {
+    //            break;
+    //        }
+    //    }
+    //}
 
     bool isvalid(std::string tokens) {
         int i = 0;
