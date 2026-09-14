@@ -12,12 +12,11 @@ int main()
         std::cout << "Dictate \n" << newinput;
         std::getline(std::cin, input);
         newinput = newinput + input;
-        std::vector<std::string> tokens = calc.separate(newinput);
-        if (calc.isvalid(tokens) != true) {
-            std::cout << "there was a mistake, please try again\n";
-            newinput = "";
-            continue;
+        if (calc.isvalid(newinput) != true) {
+            std::cout << "there was a mistake, please restart";
+            break;
         }
+        std::vector<std::string> tokens = calc.separate(newinput);
         tokens = calc.skobki(tokens);
         double answer = calc.calcus(tokens);
         std::cout << "answer is \n" << answer << "\n";

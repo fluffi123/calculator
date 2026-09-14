@@ -1,5 +1,4 @@
 #include "calculator.h"
-#include <iostream>
 #include <sstream>
 #include <cctype>
 
@@ -8,7 +7,7 @@ std::string calculator::Spaces(std::string input) {
     int i = 0;
     while (i < input.size()) {
         char c = input[i];
-        if (c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')' || c == '^') {
+        if (c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')' || c == '^' || c == '!') {
             newinput += ' ';
             newinput += c;
             newinput += ' ';
@@ -32,42 +31,31 @@ std::vector<std::string> calculator::separate(std::string input) {
     return tokens;
 }
 
+double calculator::factorial(std::string a) {
+    double answer = 1;
+    int i = 1;
+    while (std::stoi(a) >= i) {
+        answer = i * answer;
+        i++;
+    }
+    return answer;
+}
+
 double calculator::exponinantion(std::string a, std::string b) {
     double answer = 1;
     int i = 0;
-    while (std::stoi(b) > i) {
+    while (std::stod(b) > i) {
         answer = std::stod(a) * answer;
         i++;
     }
     return answer;
 }
 
-bool calculator::isNumber(const std::string& s) {
-    if (s.empty()) return false;
-    int i = 0;
-    bool hasDigit = false;
-    while (i < s.size()) {
-        char c = s[i];
-        if (isdigit(c)) {
-            hasDigit = true;
-        }
-        else if (c == '.' && i != 0) {
-        }
-        else if (c == '-' && i == 0) {
-        }
-        else {
-            return false;
-        }
-        i++;
-    }
-    return hasDigit;
-}
-
-bool calculator::isvalid(std::vector<std::string> tokens) {
+bool calculator::isvalid(std::string tokens) {
     int i = 0;
     bool valid = true;
     while (i < tokens.size()) {
-        if (isNumber(tokens[i]) || tokens[i] == "+" || tokens[i] == "-" || tokens[i] == "*" || tokens[i] == "/" || tokens[i] == "(" || tokens[i] == ")" || tokens[i] == "^") {
+        if (isdigit(tokens[i]) || tokens[i] == '+' || tokens[i] == '-' || tokens[i] == '*' || tokens[i] == '/' || tokens[i] == '(' || tokens[i] == ')' || tokens[i] == '^' || tokens[i] == '.' || tokens[i] == '!') {
             i++;
         }
         else {
@@ -85,6 +73,11 @@ double calculator::calcus(std::vector<std::string> tokens) {
             double result = exponinantion(tokens[i - 1], tokens[i + 1]);
             tokens[i] = std::to_string(result);
             tokens.erase(tokens.begin() + i + 1);
+            tokens.erase(tokens.begin() + i - 1);
+        }
+        else if (tokens[i] == "!") {
+            double result = factorial(tokens[i - 1]);
+            tokens[i] = std::to_string(result);
             tokens.erase(tokens.begin() + i - 1);
         }
         else {
@@ -164,7 +157,7 @@ std::vector<std::string> calculator::skobki(std::vector<std::string> tokens) {
             newTokens.push_back(tokens[i]);
             i++;
         }
-        newTokens.push_back(std::to_string(result));
+        newTokens.push_back(std::to_string((int)result));
         i = closeIdx + 1;
         while (i < tokens.size()) {
             newTokens.push_back(tokens[i]);
